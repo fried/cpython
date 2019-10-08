@@ -166,6 +166,14 @@ class _AsyncGeneratorContextManager(_GeneratorContextManagerBase,
                                     AbstractAsyncContextManager):
     """Helper for @asynccontextmanager."""
 
+    def __call__(self, func):
+        @wraps(func)
+        async def inner(*args, **kwds):
+            async with self.__class__(self.func, self.args, self.kwds):
+                return await func(*args, **kwds)
+
+        return inner
+
     async def __aenter__(self):
         try:
             return await self.gen.__anext__()
